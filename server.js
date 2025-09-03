@@ -9,6 +9,8 @@ const PORT = 3001;
 
 app.use(express.json()); // สำคัญมาก!
 
+const cors = require('cors');
+app.use(cors());
 
 // Agent sample data
 let agents = [
