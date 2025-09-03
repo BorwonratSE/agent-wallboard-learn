@@ -7,6 +7,9 @@ const app = express(); // เติมให้ถูก
 // ขั้นที่ 3: กำหนด PORT
 const PORT = 3001;
 
+app.use(express.json()); // สำคัญมาก!
+
+
 // Agent sample data
 let agents = [
   {
@@ -52,4 +55,50 @@ app.get('/api/agents', (req, res) => {
     count: agents.length,      
     timestamp: new Date().toISOString()  
   });
+});
+
+app.get('/api/agents/count', (req, res) => {
+  res.json({
+    success: true,
+    count: agents.length,
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.patch('/api/agents/:code/status', (req, res) => {
+    const agentCode = req.params.code;
+    const newStatus = req.body.status;
+
+    const agent = agents.find(a => a.code === agentCode);
+    if (!agent) {
+        return res.status(404).json({
+            success: false,
+            message: "Agent not found"
+        });
+    }
+
+    const validStatuses = ["Available", "Busy", "Break", "Logout", "Offline"];
+    if (!validStatuses.includes(newStatus)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid status"
+        });
+    }
+
+    if (agent.status === "Busy" && newStatus === "Break") {
+        return res.status(400).json({
+            success: false,
+            message: "Cannot change from Busy to Break directly"
+        });
+    }
+
+    const oldStatus = agent.status;
+    agent.status = newStatus;
+
+    res.json({
+        success: true,
+        message: `Agent status updated from ${oldStatus} to ${newStatus}`,
+        data: agent,
+        timestamp: new Date().toISOString()
+    });
 });
