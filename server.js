@@ -43,3 +43,13 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+
+// GET All Agents API
+app.get('/api/agents', (req, res) => {
+  res.json({
+    success: true,
+    data: agents,               
+    count: agents.length,      
+    timestamp: new Date().toISOString()  
+  });
+});
