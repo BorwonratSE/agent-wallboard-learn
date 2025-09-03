@@ -7,6 +7,26 @@ const app = express(); // เติมให้ถูก
 // ขั้นที่ 3: กำหนด PORT
 const PORT = 3001;
 
+// Agent sample data
+let agents = [
+  {
+    code: "A001",
+    name: "John Doe",
+    status: "Available",
+  },
+  {
+    code: "A002",
+    name: "Alice Smith",
+    status: "Busy",
+  },
+  {
+    code: "A003",
+    name: "Bob Lee",
+    status: "Offline",
+  }
+];
+
+
 // ขั้นที่ 4: สร้าง route แรก
 app.get('/', (req, res) => {
     res.send("Hello Agent Wallboard!");
