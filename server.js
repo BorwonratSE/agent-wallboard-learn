@@ -15,7 +15,7 @@ let agents = [
   {
     code: "A001",
     name: "John Doe",
-    status: "Available",
+    status: "Active",
   },
   {
     code: "A002",
@@ -77,7 +77,7 @@ app.patch('/api/agents/:code/status', (req, res) => {
         });
     }
 
-    const validStatuses = ["Available", "Busy", "Break", "Logout", "Offline"];
+    const validStatuses = ["Available", "Busy", "Break", "Logout", "Offline", "Active"];
     if (!validStatuses.includes(newStatus)) {
         return res.status(400).json({
             success: false,
@@ -95,10 +95,40 @@ app.patch('/api/agents/:code/status', (req, res) => {
     const oldStatus = agent.status;
     agent.status = newStatus;
 
+    
+    console.log(`[${new Date().toISOString()}] Agent ${agentCode}: ${oldStatus} → ${newStatus}`);
+
     res.json({
         success: true,
         message: `Agent status updated from ${oldStatus} to ${newStatus}`,
         data: agent,
         timestamp: new Date().toISOString()
+    });
+});
+
+app.get('/api/dashboard/stats', (req, res) => {
+    const totalAgents = agents.length;
+
+    const available = agents.filter(a => a.status === "Available").length;
+    const active = agents.filter(a => a.status === "Active").length;
+    const wrapUp = agents.filter(a => a.status === "Wrap Up").length;
+    const notReady = agents.filter(a => a.status === "Not Ready").length;
+    const offline = agents.filter(a => a.status === "Offline").length;
+
+    const calcPercent = (count) => totalAgents > 0 ? Math.round((count / totalAgents) * 100) : 0;
+
+    res.json({
+        success: true,
+        data: {
+            total: totalAgents,
+            statusBreakdown: {
+                available: { count: available, percent: calcPercent(available) },
+                active: { count: active, percent: calcPercent(active) },
+                wrapUp: { count: wrapUp, percent: calcPercent(wrapUp) },
+                notReady: { count: notReady, percent: calcPercent(notReady) },
+                offline: { count: offline, percent: calcPercent(offline) },
+            },
+            timestamp: new Date().toISOString()
+        }
     });
 });
