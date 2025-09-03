@@ -134,3 +134,59 @@ app.get('/api/dashboard/stats', (req, res) => {
         }
     });
 });
+
+app.post('/api/agents/:code/login', (req, res) => {
+    const agentCode = req.params.code;
+    const { name } = req.body;
+
+    if (!name) {
+        return res.status(400).json({ success: false, message: "Name is required" });
+    }
+
+    let agent = agents.find(a => a.code === agentCode);
+
+    if (!agent) {
+        // ถ้ายังไม่มี agent นี้ → สร้างใหม่
+        agent = {
+            code: agentCode,
+            name,
+            status: "Available",
+            loginTime: new Date().toISOString()
+        };
+        agents.push(agent);
+    } else {
+        // ถ้ามีอยู่แล้ว → อัปเดตสถานะ + เวลา
+        agent.name = name; // อัปเดตชื่อเผื่อเปลี่ยน
+        agent.status = "Available";
+        agent.loginTime = new Date().toISOString();
+    }
+
+    console.log(`[${agent.loginTime}] Agent ${agentCode} logged in`);
+
+    res.json({
+        success: true,
+        message: "Agent logged in",
+        data: agent
+    });
+});
+
+app.post('/api/agents/:code/logout', (req, res) => {
+    const agentCode = req.params.code;
+    const agent = agents.find(a => a.code === agentCode);
+
+    if (!agent) {
+        return res.status(404).json({ success: false, message: "Agent not found" });
+    }
+
+    agent.status = "Offline";
+    delete agent.loginTime;
+
+    console.log(`[${new Date().toISOString()}] Agent ${agentCode} logged out`);
+
+    res.json({
+        success: true,
+        message: "Agent logged out",
+        data: agent
+    });
+});
+
